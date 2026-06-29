@@ -47,7 +47,7 @@ interface GameState {
     stats: Partial<StreamStats> | ((prev: StreamStats | null) => StreamStats),
   ) => void;
   resetStreamStats: () => void;
-  setSystemLogs: (log: string | SystemLogItem[] | ((prev: SystemLogItem[]) => SystemLogItem[])) => void;
+  setSystemLogs: (log: string | { message: string; type?: 'error' | 'notification' | 'warning' } | SystemLogItem[] | ((prev: SystemLogItem[]) => SystemLogItem[])) => void;
   saves: SaveFile[];
   messages: GameMessage[];
   targetWordCount: number;
@@ -590,15 +590,25 @@ export const useStore = create<GameState>()(
             } else {
               state.systemLogs = [
                 {
-                  id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+                  id: Date.now().toString() + Math.random().toString(36).substring(2, 11),
                   timestamp: Date.now(),
                   message: log,
                 },
                 ...state.systemLogs,
               ];
             }
+          } else if (log && typeof log === 'object' && !Array.isArray(log) && 'message' in log) {
+            state.systemLogs = [
+              {
+                id: Date.now().toString() + Math.random().toString(36).substring(2, 11),
+                timestamp: Date.now(),
+                message: log.message,
+                type: log.type,
+              },
+              ...state.systemLogs,
+            ];
           } else {
-            state.systemLogs = log;
+            state.systemLogs = log as SystemLogItem[];
           }
         }),
       updateWorldCreation: (data) =>

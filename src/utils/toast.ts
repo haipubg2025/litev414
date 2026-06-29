@@ -7,14 +7,17 @@ const logToast = (message: string | React.ReactNode, data?: ExternalToast) => {
     if (typeof message === 'string') {
         textMessage = message;
     } else {
-        textMessage = "New Notification";
+        textMessage = "Thông báo mới";
     }
     
     if (data && data.description && typeof data.description === 'string') {
         textMessage += `\n> ${data.description}`;
     }
     
-    useStore.getState().setSystemLogs(`[Notification] ${textMessage}`);
+    useStore.getState().setSystemLogs({
+      message: `[Thông báo] ${textMessage}`,
+      type: 'notification'
+    });
 };
 
 export const toast = Object.assign((message: string | React.ReactNode, data?: ExternalToast) => {

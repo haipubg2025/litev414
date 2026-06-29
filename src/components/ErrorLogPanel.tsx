@@ -7,7 +7,7 @@ import { SystemLogItem } from '../types';
 const LogItem = ({ log, isDark, defaultExpanded = false }: { log: SystemLogItem, isDark: boolean, defaultExpanded?: boolean }) => {
   const [expanded, setExpanded] = useState(defaultExpanded);
   
-  const isNotification = log.message.startsWith('[Notification]');
+  const isNotification = log.type === 'notification' || log.message.startsWith('[Thông báo]');
   
   const bgClass = isNotification 
     ? (isDark ? 'border-blue-900/30 bg-blue-950/20' : 'border-blue-200 bg-blue-50/50')
@@ -30,7 +30,7 @@ const LogItem = ({ log, isDark, defaultExpanded = false }: { log: SystemLogItem,
     : (isDark ? 'text-red-300' : 'text-red-800');
     
   const title = isNotification 
-    ? log.message.replace('[Notification] ', '').split('\n')[0].substring(0, 80) 
+    ? log.message.replace('[Thông báo] ', '').replace('[Notification] ', '').split('\n')[0].substring(0, 80) 
     : log.message.split('\n')[0].substring(0, 80);
 
   return (
@@ -63,7 +63,7 @@ const LogItem = ({ log, isDark, defaultExpanded = false }: { log: SystemLogItem,
             transition={{ duration: 0.2 }}
           >
             <div className={`p-2 pt-0 text-[10px] sm:text-xs whitespace-pre-wrap break-words ${textContentClass}`}>
-              {isNotification ? log.message.replace('[Notification] ', '') : log.message}
+              {isNotification ? log.message.replace('[Thông báo] ', '').replace('[Notification] ', '') : log.message}
             </div>
           </motion.div>
         )}
@@ -81,7 +81,7 @@ export default function ErrorLogPanel() {
   const isDark = theme.group === 'Dark';
 
   const hasLogs = systemLogs && systemLogs.length > 0;
-  const hasErrors = hasLogs && systemLogs.some(log => !log.message.startsWith('[Notification]'));
+  const hasErrors = hasLogs && systemLogs.some(log => log.type === 'error' || (!log.message.startsWith('[Thông báo]') && !log.message.startsWith('[Notification]')));
 
   // Auto expand when there are new logs
   useEffect(() => {

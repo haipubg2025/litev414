@@ -55,6 +55,7 @@ import CodexModal from "./CodexModal";
 import GalleryModal from "./GalleryModal";
 import StatusModal from "./StatusModal";
 import LazyImage from "./LazyImage";
+import ErrorLogPanel from "./ErrorLogPanel";
 import { getGameplaySystemInstruction } from "../utils/gameplaySystemInstruction";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -1388,8 +1389,10 @@ Hành động tiếp theo của người chơi: ${effectiveUserAction}`;
           const parts = Object.keys(parsedData)
             .filter((k) => /^part\d+/i.test(k) && !k.toLowerCase().includes("audit"))
             .sort((a, b) => {
-              const numA = parseInt(a.replace(/\D/g, "")) || 0;
-              const numB = parseInt(b.replace(/\D/g, "")) || 0;
+              const matchA = a.match(/^part(\d+)/i);
+              const matchB = b.match(/^part(\d+)/i);
+              const numA = matchA ? parseInt(matchA[1], 10) : 0;
+              const numB = matchB ? parseInt(matchB[1], 10) : 0;
               return numA - numB;
             })
             .map((k) => (parsedData as any)[k]);
@@ -2744,49 +2747,7 @@ Hành động tiếp theo của người chơi: ${effectiveUserAction}`;
               <StreamLogViewer theme={theme} isExpanded={false} />
 
               {/* Phần 4: Error & Diagnostic */}
-              <div
-                className={`p-3 border-y flex justify-between items-center shrink-0 ${theme.group === "Dark" ? "border-white/10" : "border-black/10 bg-white/60"}`}
-              >
-                <h4
-                  className={`text-[10px] font-black uppercase tracking-widest flex items-center gap-2 ${theme.group === "Dark" ? "text-red-400" : "text-red-700"}`}
-                >
-                  Error & Diagnostics Log {systemLogs && systemLogs.length > 0 ? `(${systemLogs.length})` : ''}
-                  {systemLogs && systemLogs.length > 0 && (
-                    <button
-                      onClick={() => setSystemLogs("")}
-                      className="p-[2px] ml-1 bg-red-500/20 text-red-650 hover:bg-red-500/40 rounded transition-colors"
-                      title="Xóa logs"
-                    >
-                      <Trash2 size={10} />
-                    </button>
-                  )}
-                </h4>
-                <button
-                  onClick={() => setExpandedLog("error")}
-                  className={`p-1 rounded transition-colors ${theme.group === "Dark" ? "text-white/50 hover:text-white hover:bg-white/10" : "text-[#334155] hover:text-[#0f172a] hover:bg-black/5"}`}
-                >
-                  <Maximize2 size={12} />
-                </button>
-              </div>
-              <div
-                className={`h-48 shrink-0 p-4 overflow-y-auto custom-scrollbar scroll-smooth flex flex-col gap-2 ${theme.group === "Dark" ? "bg-red-950/20" : "bg-red-50/40 border border-red-100 rounded-xl m-2 shadow-inner"}`}
-              >
-                {systemLogs && systemLogs.length > 0 ? (
-                  systemLogs.map((log) => (
-                    <div key={log.id} className={`font-mono text-[11px] leading-relaxed break-words whitespace-pre-wrap border rounded p-2 ${theme.group === "Dark" ? "text-red-400/80 border-red-900/30 bg-red-900/10" : "text-red-800 font-medium border-red-200 bg-red-50"}`}>
-                      <div className="flex justify-between items-center mb-1 border-b pb-1 opacity-70">
-                        <span className="font-bold">Error Info</span>
-                        <span className="text-[9px]">{new Date(log.timestamp).toLocaleTimeString()}</span>
-                      </div>
-                      {log.message}
-                    </div>
-                  ))
-                ) : (
-                  <div className={`font-mono text-[11px] leading-relaxed break-words whitespace-pre-wrap ${theme.group === "Dark" ? "text-red-400/80" : "text-red-800 font-medium"}`}>
-                    {"> Hệ thống trạng thái bình thường...\n> Không có lỗi phát sinh."}
-                  </div>
-                )}
-              </div>
+              <ErrorLogPanel />
             </motion.div>
           )}
         </AnimatePresence>
@@ -3387,21 +3348,10 @@ Hành động tiếp theo của người chơi: ${effectiveUserAction}`;
               <div className="flex items-center justify-between p-4 border-b border-white/10 shrink-0">
                 <div className="flex items-center gap-3">
                   <h4
-                    className={`text-sm font-black uppercase tracking-widest ${expandedLog === "error" ? "text-red-400" : "text-purple-400"}`}
+                    className={`text-sm font-black uppercase tracking-widest text-purple-400`}
                   >
-                    {expandedLog === "reasoning"
-                      ? "Hội Đồng AI Suy Luận (Deep Reasoning)"
-                      : "Error & Diagnostics Log"}
+                    Hội Đồng AI Suy Luận (Deep Reasoning)
                   </h4>
-                  {expandedLog === "error" && systemLogs && (
-                    <button
-                      onClick={() => setSystemLogs("")}
-                      className="p-1 px-2 bg-red-500/20 text-red-400 hover:bg-red-500/40 rounded transition-colors text-xs font-bold"
-                      title="Xóa logs"
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  )}
                 </div>
                 <div className="flex items-center gap-2">
                   <button
@@ -3430,29 +3380,9 @@ Hành động tiếp theo của người chơi: ${effectiveUserAction}`;
               </div>
               <div
                 ref={expandedLogScrollRef}
-                className={`flex-1 p-4 md:p-6 overflow-y-auto custom-scrollbar ${expandedLog === "error" ? "bg-red-950/20" : ""} ${theme.group === "Dark" ? "theme-panel !border-none" : theme.bgClass}`}
+                className={`flex-1 p-4 md:p-6 overflow-y-auto custom-scrollbar ${theme.group === "Dark" ? "theme-panel !border-none" : theme.bgClass}`}
               >
-                {expandedLog === "reasoning" ? (
-                  <StreamLogViewer theme={theme} isExpanded={true} expandedLog={expandedLog} />
-                ) : (
-                  <div className="flex flex-col gap-3 max-w-5xl mx-auto">
-                    {systemLogs && systemLogs.length > 0 ? (
-                      systemLogs.map((log) => (
-                        <div key={log.id} className={`font-mono text-sm leading-relaxed break-words whitespace-pre-wrap border rounded p-4 ${expandedLog === "error" ? (theme.group === "Dark" ? "text-red-400 border-red-900/30 bg-red-900/10" : "text-red-800 border-red-200 bg-red-50") : (theme.group === "Dark" ? "text-green-400 border-green-900/30 bg-green-900/10" : "text-green-800 border-green-200 bg-green-50")}`}>
-                          <div className="flex justify-between items-center mb-2 border-b border-current/20 pb-2 opacity-80">
-                            <span className="font-bold">Error Info</span>
-                            <span className="text-xs">{new Date(log.timestamp).toLocaleString()}</span>
-                          </div>
-                          {log.message}
-                        </div>
-                      ))
-                    ) : (
-                      <div className={`font-mono text-sm leading-relaxed break-words whitespace-pre-wrap ${expandedLog === "error" ? "text-red-400/80" : "text-green-400/80"}`}>
-                        {"> Hệ thống trạng thái bình thường...\n> Không có lỗi phát sinh."}
-                      </div>
-                    )}
-                  </div>
-                )}
+                <StreamLogViewer theme={theme} isExpanded={true} expandedLog={expandedLog} />
               </div>
             </motion.div>
           </motion.div>

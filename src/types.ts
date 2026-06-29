@@ -408,6 +408,7 @@ export interface SystemLogItem {
   id: string;
   timestamp: number;
   message: string;
+  type?: 'error' | 'notification' | 'warning';
 }
 
 export interface GameMessage {

@@ -941,8 +941,10 @@ export function extractAllStoryTextsRobust(rawText: string): string {
   const parts = storyParts.filter(p => p.key.startsWith("part"));
   if (parts.length > 0) {
     parts.sort((a, b) => {
-      const numA = parseInt(a.key.replace(/\D/g, '')) || 0;
-      const numB = parseInt(b.key.replace(/\D/g, '')) || 0;
+      const matchA = a.key.match(/^part(\d+)/i);
+      const matchB = b.key.match(/^part(\d+)/i);
+      const numA = matchA ? parseInt(matchA[1], 10) : 0;
+      const numB = matchB ? parseInt(matchB[1], 10) : 0;
       if (numA !== numB) return numA - numB;
       return a.index - b.index;
     });

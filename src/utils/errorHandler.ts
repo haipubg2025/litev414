@@ -98,10 +98,13 @@ export function formatErrorMessage(error: any): { type: string; message: string;
   };
 }
 
-export function generateSysLog(error: any): string {
+export function generateSysLog(error: any): { message: string, type: 'error' } {
   const formatted = formatErrorMessage(error);
   const timeStr = new Date().toLocaleTimeString('vi-VN', { hour12: false });
-  return `[${timeStr}] 🔴 LOẠI LỖI: ${formatted.type}\n📌 MÔ TẢ: ${formatted.message}\n💡 CÁCH KHẮC PHỤC: \n${formatted.solution}\n----------------------------------------\n`;
+  return {
+    message: `[${timeStr}] 🔴 LOẠI LỖI: ${formatted.type}\n📌 MÔ TẢ: ${formatted.message}\n💡 CÁCH KHẮC PHỤC: \n${formatted.solution}\n----------------------------------------\n`,
+    type: 'error'
+  };
 }
 
 export function normalizeUsage(u: any) {
