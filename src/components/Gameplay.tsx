@@ -38,6 +38,7 @@ import {
   ArrowUpToLine,
   ArrowDownToLine,
   CloudSun,
+  AlertTriangle,
 } from "lucide-react";
 import { useStore } from "../store/useStore";
 import { useDeviceMode } from "../hooks/useDeviceMode";
@@ -2586,6 +2587,12 @@ Hành động tiếp theo của người chơi: ${effectiveUserAction}`;
                     className={`flex flex-col items-center justify-center gap-1.5 p-2 rounded-lg transition-colors cursor-pointer text-[10px] font-bold tracking-wider ${getHeaderBtnClass("gray")}`}
                   >
                     <SettingsIcon size={16} /> <span>CẤU HÌNH</span>
+                  </button>
+                  <button
+                    onClick={() => window.dispatchEvent(new CustomEvent("open-error-log-modal"))}
+                    className={`flex flex-col items-center justify-center gap-1.5 p-2 rounded-lg transition-colors cursor-pointer text-[10px] font-bold tracking-wider ${getHeaderBtnClass("rose")}`}
+                  >
+                    <AlertTriangle size={16} /> <span>SYS LOGS</span>
                   </button>
                   <button
                     onClick={() => setUseColorEnabled(!useColorEnabled)}

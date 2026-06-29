@@ -90,6 +90,12 @@ export default function ErrorLogPanel() {
     }
   }, [hasLogs]);
   
+  useEffect(() => {
+    const handleOpenModal = () => setShowModal(true);
+    window.addEventListener("open-error-log-modal", handleOpenModal);
+    return () => window.removeEventListener("open-error-log-modal", handleOpenModal);
+  }, []);
+  
   // Decide colors based on hasErrors or hasLogs
   const containerBgBorder = hasLogs 
     ? (hasErrors 
