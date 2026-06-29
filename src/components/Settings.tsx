@@ -589,6 +589,8 @@ export default function Settings() {
                         <option value={2000}>2000 chữ</option>
                         <option value={3000}>3000 chữ</option>
                         <option value={4000}>4000 chữ</option>
+                        <option value={6000}>6000 chữ</option>
+                        <option value={8000}>8000 chữ</option>
                         <option value={10000}>10000 chữ</option>
                       </select>
                     </div>

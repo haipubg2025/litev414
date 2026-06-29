@@ -595,6 +595,7 @@ export default function Gameplay() {
   const [currentPage, setCurrentPage] = useState(1);
   const [editingTurnId, setEditingTurnId] = useState<string | null>(null);
   const [editingContent, setEditingContent] = useState<string>("");
+  const [isStrictEndEnabled, setIsStrictEndEnabled] = useState(false);
   const totalPages = Math.max(1, turns.length - 1);
 
   useEffect(() => {
@@ -812,6 +813,11 @@ export default function Gameplay() {
     setRightOpen(true); // Tự động mở khung stream
 
     const isFirstTurn = userAction === null;
+    let effectiveUserAction = userAction;
+    if (isStrictEndEnabled && userAction) {
+      effectiveUserAction = userAction + "\n\n[GHI CHÚ HỆ THỐNG YÊU CẦU BẮT BUỘC TỪ NGƯỜI CHƠI: HÃY DỪNG MẠCH TRUYỆN CHÍNH VĂN NGAY LẬP TỨC TẠI ĐÚNG THỜI ĐIỂM HÀNH ĐỘNG NÀY KẾT THÚC! TUYỆT ĐỐI KHÔNG TỰ CHẾ THÊM SỰ KIỆN, KHÔNG TUA NHANH THỜI GIAN THÊM BẤT KỲ GIÂY PHÚT NÀO NỮA! CHỈ ĐẾN ĐÂY THÔI KHÔNG HƠN KHÔNG KÉM!]";
+    }
+
     const aiMsgId = Date.now().toString();
 
     // Reset stream
@@ -822,7 +828,7 @@ export default function Gameplay() {
     );
 
     const mcLocationStr = turns.length > 0 ? (turns[turns.length - 1].aiMsg?.mcLocation || "") : "";
-    const actionStr = userAction || gameData.startingContext || "";
+    const actionStr = effectiveUserAction || gameData.startingContext || "";
 
     const excludedKeys = ["worldState"];
     let contextStr = "";
@@ -986,7 +992,7 @@ ${historyText}
 
 BẠN ĐANG XỬ LÝ LƯỢT CHƠI THỨ: ${turns.length}
 
-Hành động tiếp theo của người chơi: ${userAction}`;
+Hành động tiếp theo của người chơi: ${effectiveUserAction}`;
     }
 
     const systemInstruction = getGameplaySystemInstruction(
@@ -2453,6 +2459,23 @@ Hành động tiếp theo của người chơi: ${userAction}`;
                   <ChevronRight size={16} />
                 </button>
               </div>
+
+              {/* Strict End Toggle */}
+              <button
+                onClick={() => setIsStrictEndEnabled(!isStrictEndEnabled)}
+                className={`px-3 md:px-4 py-1.5 md:py-2 rounded-lg font-bold text-xs md:text-sm transition-all cursor-pointer border ${
+                  isStrictEndEnabled
+                    ? theme.group === "Dark"
+                      ? "bg-red-500/20 text-red-400 border-red-500/50 shadow-[0_0_10px_rgba(239,68,68,0.2)]"
+                      : "bg-red-100 text-red-600 border-red-300 shadow-sm"
+                    : theme.group === "Dark"
+                    ? "bg-blue-500/10 text-slate-400 border-blue-500/20 hover:text-blue-300"
+                    : "bg-blue-50/50 text-slate-500 border-blue-200/50 hover:text-slate-700"
+                }`}
+                title="Bật/Tắt chế độ: Ép AI kết thúc chính văn ngay sau hành động (Không tự viết thêm)"
+              >
+                END
+              </button>
 
               {/* Scroll Controls & Toggles */}
               <div className="flex items-center gap-2">
